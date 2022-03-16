@@ -1,0 +1,324 @@
+#include <stdio.h>
+#include <iostream>
+#include <time.h>
+using namespace std;
+
+struct move_mas		// двусвязный список из ходов	
+{
+    int number;
+    int x;
+    int y;
+    int metod;
+    move_mas* next;
+    move_mas* prev;
+};
+
+move_mas* create_first(int N) //создаём первый ход
+{
+    setlocale(LC_ALL, "ru");
+    move_mas* head = new move_mas;
+
+    cout << "Введите начальные координаты:" << endl
+
+    << "Координата по оси\"X\"\t"; 
+    cin >> head->x;
+    if (head->x > N || head->x < 1)
+    {cout << "Неверные начальные координаты"; system("pause"); return 0;};
+
+    cout << "Координата по оси\"Y\"\t";
+    cin >> head->y;
+    if (head->y > N || head->y < 1)
+    {cout << "Неверные начальные координаты"; system("pause"); return 0;};	
+
+    head->number = 1;
+    head->metod = 0;
+    head->next = head;
+    head->prev = head;
+    return head;
+};
+
+move_mas* create_next(move_mas* head) // создание элемента последним в списке
+{
+    move_mas* actual = new move_mas;
+
+    actual->next = head;
+    actual->prev = head->prev;
+    actual->prev->next = actual;
+    head->prev = actual;
+    actual->number = actual->prev->number + 1;
+    actual->metod = 0;
+    return actual;
+}
+
+bool search_double(move_mas* head, int x, int y)	//проверка на занятость клетки
+{
+    move_mas* current = head;
+    while (current->next != head)
+    {
+        if (current->x == x && current->y == y)
+        {
+            return 0;
+            break;
+        }
+        current = current->next;
+    }
+    return 1;
+}
+
+int search_for_print(move_mas* head, int x, int y) //перебор элементов для отображения в консоли
+{
+    move_mas* current = head;
+    while (current->next != head)
+    {
+        if (current->x == x && current->y == y)
+        {
+            return current->number;
+            break;
+        }
+        current = current->next;
+    }
+    return 0;
+}
+
+void delete_srtruct(move_mas* head)	// очищение памяти
+{
+    if (head)
+    {
+        delete_srtruct(head->prev);
+        delete head;
+    }
+}
+
+bool delete_end(move_mas* head) //отмена последнего хода
+{	
+    if (head->prev->number>1)
+    {
+    move_mas* temp = head->prev;
+    temp->prev->next = head;
+    head->prev = temp->prev;
+    temp->next = NULL;
+    temp->prev = NULL;
+    delete temp;
+    return 1;
+    }
+    else { return 0; };
+};
+
+int Switch(move_mas* head, int N) {  // выбор хода конём
+    move_mas* current = create_next(head)->prev;
+        int a = 1;
+        while (a==1)
+        {
+            switch (current->metod)
+            {
+            case 0:
+            {
+                if (current->x < N && current->y > 2)
+                {
+               
+                    if (search_double(head, current->x + 1, current->y - 2))
+                    {
+                    current->next->x = current->x + 1;
+                    current->next->y = current->y - 2; 
+                    cout << "Конь переместился на координаты (x;y): " << current->next->x << ";" << current->next->y << " ." << endl;
+                    a = 0;break;
+                    }
+                    else{ current->metod++; cout << "Место занято, пробуем другой метод..." << endl; break;}
+                }
+                else { current->metod++;};
+                cout << "Пробуем другой метод..." << endl;
+                break;
+            }
+            case 1:
+            {
+                if (current->x < N-1 && current->y > 1)
+                {
+
+                    if (search_double(head, current->x + 2, current->y - 1))
+                    {
+                        current->next->x = current->x + 2;
+                        current->next->y = current->y - 1;
+                        cout << "Конь переместился на координаты (x;y): " << current->next->x << ";" << current->next->y << " ." << endl;
+                        a = 0; break;
+                    }
+                    else { current->metod++; cout << "Место занято, пробуем другой метод..." << endl; break; }
+                }
+                else { current->metod++; };
+                cout << "Пробуем другой метод..." << endl;
+                break;
+            }
+            case 2:
+            {
+                if (current->x < N-1 && current->y < N)
+                {
+
+                    if (search_double(head, current->x + 2, current->y + 1))
+                    {
+                        current->next->x = current->x + 2;
+                        current->next->y = current->y + 1;
+                        cout << "Конь переместился на координаты (x;y): " << current->next->x << ";" << current->next->y << " ." << endl;
+                        a = 0; break;
+                    }
+                    else { current->metod++; cout << "Место занято, пробуем другой метод..." << endl; break; }
+                }
+                else { current->metod++; };
+                cout << "Пробуем другой метод..." << endl;
+                break;
+            }
+            case 3:
+            {
+                if (current->x < N && current->y < N-1)
+                {
+
+                    if (search_double(head, current->x + 1, current->y + 2))
+                    {
+                        current->next->x = current->x + 1;
+                        current->next->y = current->y + 2;
+                        cout << "Конь переместился на координаты (x;y): " << current->next->x << ";" << current->next->y << " ." << endl;
+                        a = 0; break;
+                    }
+                    else { current->metod++; cout << "Место занято, пробуем другой метод..." << endl; break; }
+                }
+                else { current->metod++; };
+                cout << "Пробуем другой метод..." << endl;
+                break;
+            }
+            case 4:
+            {
+                if (current->x > 1 && current->y < N-1)
+                {
+
+                    if (search_double(head, current->x - 1, current->y + 2))
+                    {
+                        current->next->x = current->x - 1;
+                        current->next->y = current->y + 2;
+                        cout << "Конь переместился на координаты (x;y): " << current->next->x << ";" << current->next->y << " ." << endl;
+                        a = 0; break;
+                    }
+                    else { current->metod++; cout << "Место занято, пробуем другой метод..." << endl; break; }
+                }
+                else { current->metod++; };
+                cout << "Пробуем другой метод..." << endl;
+                break;
+            }
+            case 5:
+            {
+                if (current->x > 2 && current->y < N)
+                {
+
+                    if (search_double(head, current->x - 2, current->y + 1))
+                    {
+                        current->next->x = current->x - 2;
+                        current->next->y = current->y + 1;
+                        cout << "Конь переместился на координаты (x;y): " << current->next->x << ";" << current->next->y << " ." << endl;
+                        a = 0; break;
+                    }
+                    else { current->metod++; cout << "Место занято, пробуем другой метод..." << endl; break; }
+                }
+                else { current->metod++; };
+                cout << "Пробуем другой метод..." << endl;
+                break;
+            }
+            case 6:
+            {
+                if (current->x > 2 && current->y > 1)
+                {
+
+                    if (search_double(head, current->x - 2, current->y - 1))
+                    {
+                        current->next->x = current->x - 2;
+                        current->next->y = current->y - 1;
+                        cout << "Конь переместился на координаты (x;y): " << current->next->x << ";" << current->next->y << " ." << endl;
+                        a = 0; break;
+                    }
+                    else { current->metod++; cout << "Место занято, пробуем другой метод..." << endl; break; }
+                }
+                else { current->metod++; };
+                cout << "Пробуем другой метод..." << endl;
+                break;
+            }
+            case 7:
+            {
+                if (current->x > 1 && current->y > 2)
+                {
+
+                    if (search_double(head, current->x - 1, current->y - 2))
+                    {
+                        current->next->x = current->x - 1;
+                        current->next->y = current->y - 2;
+                        cout << "Конь переместился на координаты (x;y): " << current->next->x << ";" << current->next->y << " ." << endl;
+                        a = 0; break;
+                    }
+                    else { current->metod++; cout << "Место занято, пробуем другой метод..." << endl; break; }
+                }
+                else { current->metod++; };
+                cout << "Пробуем другой метод..." << endl;
+                break;
+            }
+            case 8:
+            {
+                cout << "Из этих координат нет свободного хода. Придётся возвращаться на ход назад(" << endl;
+                delete_end (head);
+                a = 0;
+                break;
+            }
+            default:
+            {
+                cout << "Произошла критическая ошибка системы(" << endl;
+                break;
+            }
+            }
+        }
+    return current->metod;
+};
+
+ int main()
+{
+    setlocale(LC_ALL, "");
+    int N;
+    cout << "Введите размерность доски (от 2) :"; cin >> N;
+    if ( N < 2) { cout << "Неверный размер"; system("pause"); return 0;};
+    move_mas* head = create_first(N);
+   // clock_t start = clock(); 
+    int a = 0;
+    while (head->prev->number != N*N+1)
+    {
+        if (Switch(head, N)<8)
+        {
+        Switch(head, N);
+        cout << "Сделан ход." << endl;
+        }
+        else
+        {
+            if (delete_end(head))
+            {
+                head->prev->metod++;
+            }
+            else 
+            { cout << "НЕТ ТАКОЙ КОМБИНАЦИИ ИЗ ДАННЫХ КООРДИНАТ" << endl; break; }
+        } 
+        for (int i = 1; i < N + 1; i++)
+        {
+            for (int j = 1; j < N + 1; j++)
+            {
+                cout << search_for_print(head, j, i) << "\t";
+            }
+            cout << endl << endl;
+        }
+       
+        if (head->prev->number > a)
+        {
+            a = head->prev->number;
+            cout << "Максимальных ход = " << a << endl;
+        }
+    }
+    //delete_srtruct(head);
+    //cout << "Память очищена." << endl;
+    cout << "Максимальных ход = " << a << endl;
+   // clock_t end = clock();
+   //  double seconds = (double)(end - start);
+   // cout << "Время поиска решения " << seconds << " сек." << endl;
+    cout << "___________________________________________" << endl;
+    system("pause");
+    return 0;
+}
